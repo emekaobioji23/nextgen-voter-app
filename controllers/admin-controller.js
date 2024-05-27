@@ -230,6 +230,8 @@ exports.showAllVotesCastInVotingRoomsCreatedByAdmin=catchAsync(async (req, res, 
           await Vote.findByIdAndDelete(vote.id)
         })
       }
+      await Contestant.updateMany({ votingroom: votingroom.id }, { $unset: { votingroom: 1 } });
+
       await VotingRoom.findByIdAndDelete(votingroom.id)
       myconsole.log("exits")
       res.json({  

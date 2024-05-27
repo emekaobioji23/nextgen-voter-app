@@ -26,7 +26,6 @@ const votingRoomSchema = new Schema(
     toObject: {virtuals: true,},toJSON: {virtuals: true,},
   }
 );
-
 const VotingRoom = mongoose.model("VotingRoom", votingRoomSchema);
 
 module.exports = VotingRoom;
