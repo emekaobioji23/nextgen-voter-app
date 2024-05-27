@@ -162,13 +162,10 @@ const {
 exports.displayContestantsInVotingRoom=catchAsync(async (req, res) => {
   const myconsole = new Econsole("voter-controller.js", "displayContestantsInVotingRoom", "")
   myconsole.log("entry")
-  const votingroomId = req.params.id;
-  let contestants
   let contestantsInVotingroom=[]
   let contestantData={}
 
-  const votingroom = await VotingRoom.findById(votingroomId).populate("contestants").populate("admin")
-  contestants = votingroom.contestants
+  const contestants = await Contestant.find({votingroom:req.params.id}).populate("votingroom","awardorposition").admin("email")
   if(contestants.length!=0){
     await Promise.all(
     contestants.map(async (contestant, c) => {
