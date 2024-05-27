@@ -1,6 +1,7 @@
 const Contestant = require("../models/contestant");
 const VotingRoom = require("../models/votingroom");
 const Vote = require("../models/vote");
+const Admin = require("../models/admin");
 const catchAsync=require("../utils/catch-async");
 const Econsole=require("../utils/econsole-log")
 const ErrorObject = require("../utils/error")
@@ -42,6 +43,7 @@ exports.showAllVotingRoomsCreatedByAdmin=catchAsync(async (req, res, next) => {
 exports.showAllVotesCastInVotingRoomsCreatedByAdmin=catchAsync(async (req, res, next) => {
   const myconsole = new Econsole("admin-controller.js", "showAllVotesCastInVotingRoomsCreatedByAdmin", "")
   myconsole.log("entry")
+  const admin = await Admin.findById(req.params.id)
   const votes = await Vote.find({admin:req.params.id}).populate("admin","email").populate("votingroom","awardorposition").populate("contestant","name");
   if(votes.length!=0){
     res.status(201).json({
@@ -50,7 +52,7 @@ exports.showAllVotesCastInVotingRoomsCreatedByAdmin=catchAsync(async (req, res, 
     });
   }else{
     res.status(201).json({
-      status: "There are no votes cast in any voting room created by this admin",
+      status: `There are no votes cast in any voting room created by this admin ${admin.email}`,
       data: {votes},
     });
   }
