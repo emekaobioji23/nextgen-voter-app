@@ -165,7 +165,7 @@ exports.displayContestantsInVotingRoom=catchAsync(async (req, res) => {
   let contestantsInVotingroom=[]
   let contestantData={}
 
-  const contestants = await Contestant.find({votingroom:req.params.id}).populate("votingroom","awardorposition").admin("email")
+  const contestants = await Contestant.find({votingroom:req.params.id})
   if(contestants.length!=0){
     await Promise.all(
     contestants.map(async (contestant, c) => {
@@ -174,7 +174,7 @@ exports.displayContestantsInVotingRoom=catchAsync(async (req, res) => {
         contestant.save()
       }
       contestant = await Contestant.findByIdAndUpdate(contestant.id,
-        {votinglink:`${req.protocol}://${req.get("host")}/api/v1/vote/${contestant.id}?votingroomId=${votingroom.id}&adminId=${votingroom.admin.id}`},
+        {votinglink:`${req.protocol}://${req.get("host")}/api/v1/vote/${contestant.id}?votingroomId=${contestant.votingroom}&adminId=${contestant.admin}`},
         {new: true,runValidators: false,})
       contestantData={
         username:contestant.username,
