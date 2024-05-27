@@ -174,7 +174,7 @@ exports.displayContestantsInVotingRoom=catchAsync(async (req, res) => {
         contestant.save()
       }
       contestant = await Contestant.findByIdAndUpdate(contestant.id,
-        {votinglink:`${req.protocol}://${req.get("host")}/api/v1/vote/${contestant.id}?votingroomId=${contestant.votingroom}&adminId=${contestant.admin}`},
+        {votinglink:`${req.protocol}://${req.get("host")}${VOTING_REL_URL}${contestant.id}?votingroomId=${contestant.votingroom}&adminId=${contestant.admin}`},
         {new: true,runValidators: false,})
       contestantData={
         username:contestant.username,

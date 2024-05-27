@@ -128,11 +128,13 @@ exports.showAllVotesCastInVotingRoomsCreatedByAdmin=catchAsync(async (req, res, 
     myconsole.log("entry")
     req.body.updatedAt=Date.now();
     let votingroom = await VotingRoom.create(req.body);
-    votingroom = await VotingRoom.findById(votingroom.id)
+    votingroom = await VotingRoom.findById(votingroom.id).populate("contestants")
     if(votingroom.contestants!=0){
       votingroom.contestants.map(async(contestant,c)=>{
         await Contestant.findByIdAndUpdate(contestant.id,
           {votingroom:votingroom.id},
+          {votecount:0},
+          {votinglink:`${req.protocol}://${req.get("host")}${VOTING_REL_URL}${contestant.id}?votingroomId=${votingroom.id}&adminId=${req.param.id}`},
           {
             new: true,
             runValidators: false,
