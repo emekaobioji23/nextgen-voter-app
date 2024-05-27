@@ -131,7 +131,12 @@ exports.showAllVotesCastInVotingRoomsCreatedByAdmin=catchAsync(async (req, res, 
     votingroom = await VotingRoom.findById(votingroom.id)
     if(votingroom.contestants!=0){
       votingroom.contestants.map(async(contestant,c)=>{
-        await Contestant.findByIdAndUpdate(contestant.id,{votingroom:votingroom.id})
+        await Contestant.findByIdAndUpdate(contestant.id,
+          {votingroom:votingroom.id},
+          {
+            new: true,
+            runValidators: false,
+          })
       })
     }
     myconsole.log("exits")
@@ -230,7 +235,11 @@ exports.showAllVotesCastInVotingRoomsCreatedByAdmin=catchAsync(async (req, res, 
           await Vote.findByIdAndDelete(vote.id)
         })
       }
-      await Contestant.updateMany({ votingroom: votingroom.id }, { $unset: { votingroom: 1 } });
+      await Contestant.updateMany(
+        { votingroom: votingroom.id },
+        { $unset: { votinglink: 1, votingroom: 1 }, $set: { votecount: 0 }},
+        
+      );
 
       await VotingRoom.findByIdAndDelete(votingroom.id)
       myconsole.log("exits")
