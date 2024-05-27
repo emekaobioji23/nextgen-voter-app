@@ -6,20 +6,13 @@ const catchAsync = require("../utils/catch-async");
 const ErrorObject = require("../utils/error");
 const sendEmail = require("../utils/email");
 const Econsole = require("../utils/econsole-log");
-const {v4:uuidGenerator} = require("uuid")
-const paymentIntialization=require("../utils/payment");
-const Contestant = require("../models/contestant");
-const Vote = require("../models/vote");
-
-
-
-
 
 const {
   JWT_COOKIE_EXPIRES_IN,
   JWT_EXPIRES_IN,
   JWT_SECRET,
   NODE_ENV, 
+  PASSWORD_RESET_URL_PART,
 } =  process.env;
 
   const otp=async (noOfDigits,Model)=>{
@@ -284,7 +277,7 @@ exports.forgotPassword = (Model) =>
     await user.save({ validateBeforeSave: false });
 
     // 3. Send token to the email addess
-    const resetUrl = /*`${req.protocol}://${req.get("host")}/api/v1/${user.role}s/reset-password/${resetToken}`*/"https://www.jumia.com.ng/oraimo-20000mah-power-charging-bank-fast-charging-opb-p208dn-127139672.html";
+    const resetUrl = `${req.protocol}://${req.get("host")}${PASSWORD_RESET_URL_PART}${user.role}s/reset-password/${resetToken}`;
     console.log(resetUrl)
 
     const message = `To reset your password click on the link below to submit your new password: ${resetUrl}`;

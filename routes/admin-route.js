@@ -10,10 +10,11 @@ const {
   forgotPassword,
   resetPassword,
   updatePassword,
-  deleteOne,
 } = require("../controllers/generic-controller");
 const {
-  showAllContestantsForAdmin,
+  showAllContestantsCreatedByAdmin,
+  showAllVotesCastInVotingRoomsCreatedByAdmin,
+  showAllVotingRoomsCreatedByAdmin,
   adminOwnsVotingRoom,
   verifyAdminCreatedContestant,
   verifyAdminCreatedContestants,
@@ -41,7 +42,9 @@ router.post("/signup", validateAdmin,signUp(Admin));
 router.post("/signin", signIn(Admin));
 router.post("/create-contestant/:id",protect(Admin),sameUser(Admin),uploadImagesToTempLocation,
 uploadImagesToCloudinary,validateContestant,createOne(Contestant));//id=adminId
-router.get("/show-all-contestants-for-admin/:id", protect(Admin),sameUser(Admin),showAllContestantsForAdmin);//id=adminId
+router.get("/show-all-contestants-created-by-admin/:id", protect(Admin),sameUser(Admin),showAllContestantsCreatedByAdmin);//id=adminId
+router.get("/show-all-voting-rooms-created-by-admin/:id", protect(Admin),sameUser(Admin),showAllVotingRoomsCreatedByAdmin);//id=adminId
+router.get("/show-all-votes-casts-in-voting-rooms-created-by-admin/:id", protect(Admin),sameUser(Admin),showAllVotesCastInVotingRoomsCreatedByAdmin);//id=adminId
 router.post("/create-votingroom/:id", protect(Admin),sameUser(Admin),validateVotingRoom,verifyAdminCreatedContestants,createVotingRoom);//id=adminId
 router.patch("/update-voting-room/:id",protect(Admin),adminOwnsVotingRoom,updateOne(VotingRoom));//id=votingroomId
 router.route("/:id").get(protect(Admin), getOne(Admin)).patch(protect(Admin), sameUser(Admin), updateOne(Admin));//id=adminId
@@ -50,5 +53,5 @@ router.patch("/reset-password/:token", resetPassword(Admin));
 router.patch("/update-password/:id", protect(Admin), updatePassword(Admin));//id=adminId
 router.delete("/contestant/:id",protect(Admin), verifyAdminCreatedContestant, deleteContestant);//:id = contestant
 router.delete("/votingroom/:id",protect(Admin), verifyAdminCreatedVotingRoom, deleteVotingRoom);//:id = votingroom
-router.delete("/votes/:id",protect(Admin), verifyVoteWasCastInAdminCreatedVotingRoom, deleteVote);//:id = vote
+router.delete("/vote/:id",protect(Admin), verifyVoteWasCastInAdminCreatedVotingRoom, deleteVote);//:id = vote
 module.exports = router;

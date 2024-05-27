@@ -2,6 +2,7 @@ const got = require("got");
 const Flutterwave = require("flutterwave-node-v3");
 const {
   FLW_SECRET_KEY,
+  FLW_PUBLIC_KEY,
   FLW_URL,
   FLW_CUSTOMER_CURRENCY,
   FLW_CUSTOMER_CONSUMER_ID,
@@ -9,6 +10,7 @@ const {
   FLW_CUSTOMER_PHONENUMBER,
   FLW_CUSTOMER_EMAIL,
   FLW_CUSTOMER_TITLE,
+  VOTING_REL_URL,
 } = process.env;
 exports.paymentIntialization = async (req,res) => {
   console.log(req);
@@ -65,9 +67,9 @@ exports.verifyPayment = async (req,res,next) => {
         // Inform the customer their payment was unsuccessful
         res.status(404).json({
           message: "payment unsuccessful",
-          votingurl:req.body.votingurl
+          votinglink:`${req.protocol}://${req.get("host")}${VOTING_REL_URL}${req.params.id}?votingroomId=${req.query.votingroomId}&adminId=${req.query.adminId}`
         });
       }
     })
-    .catch(console.log);
+    .catch((err)=>console.log(err));
 };

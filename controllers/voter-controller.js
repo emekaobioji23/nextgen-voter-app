@@ -12,6 +12,9 @@ const Vote = require("../models/vote");
 const {
   AMOUNT_PER_VOTE,
   FLW_CALLBACK_URL,
+  VOTING_REL_URL,
+  SERVER_PORT,
+  FLW_CUSTOMER_CURRENCY,
   PORT 
 } =  process.env;
   
@@ -23,10 +26,10 @@ const {
     const votingroomId = req.query.votingroomId;
     const adminId = req.query.adminId;
     //votingurl passed for revote incase payment verification fails later
-    req.body.votingurl =`${req.protocol}://${req.get("host")}/api/v1/vote/${contestantId}?votingroomId=${votingroomId}&adminId=${adminId}`;
+    //req.body.votingurl =`${req.protocol}://${req.get("host")}${VOTING_REL_URL}${contestantId}?votingroomId=${votingroomId}&adminId=${adminId}`;
 
-    //third party payment redirect url
-    req.body.redirect_url=`${req.protocol}://localhost:${PORT}${FLW_CALLBACK_URL}/${contestantId}?votingroomId=${votingroomId}&adminId=${adminId}&amount=${req.body.amount}`
+    //third party payment redirect url. we used ${req.get("host")} instead of ${SERVER_PORT} because paystack was throwing errors
+    req.body.redirect_url=`${req.protocol}://${SERVER_PORT}${FLW_CALLBACK_URL}/${contestantId}?votingroomId=${votingroomId}&adminId=${adminId}&amount=${req.body.amount}&currency=${FLW_CUSTOMER_CURRENCY}`
     const response = await paymentIntialization(req.body,res);
       if(response.status==="success"){
         res.status(200).json({
@@ -43,13 +46,12 @@ const {
   
   exports.vote=catchAsync(async (req, res) => {
     const myconsole = new Econsole("voter-controller.js", "vote", "")
-    myconsole.log("req=",req)
     const contestantId = req.params.id
-    req.body.contestantId=contestantId
+    req.body.contestant=contestantId
     const votingroomId = req.query.votingroomId;
-    req.body.votingroomId=votingroomId
+    req.body.votingroom=votingroomId
     const adminId = req.query.adminId;
-    req.body.adminId=adminId
+    req.body.admin=adminId
     req.body.tx_ref=req.query.tx_ref
     req.body.transaction_id=req.query.transaction_id
 
@@ -65,14 +67,14 @@ const {
         runValidators: false,
       });
         req.body.amount = req.query.amount
-        const vote = await Vote.create(req.body)
-        myconsole.log("vote",vote)
+        let vote = await Vote.create(req.body)
+        vote = await Vote.findById(vote.id).populate("contestant","username name images -_id")
+        .populate("votingroom","-admin -contestants -_id").populate("admin","email -_id")
+        //myconsole.log("vote",vote)
           res.status(200).json({
           status: "success",
           message: "successfully voted",
-          contestant: contestant,
           vote: vote,
-          votingurl:contestant.votingurl
         });
       }
     myconsole.log("exits")
@@ -126,20 +128,19 @@ const {
     let votingrooms
     let votingroomsWithContestants=[]
     let votingroomData
-    votingrooms = await VotingRoom.find({contestants: { $ne: null }, $expr: { $gt: [{ $size: "$contestants" }, 0] }})
+    votingrooms = await VotingRoom.find({contestants: { $ne: null }, $expr: { $gt: [{ $size: "$contestants" }, 0] }}).populate("admin")
     if(votingrooms.length!=0){
       votingrooms.map(async (votingroom, vr) => {
           votingroomData={
             votingroom_id:votingroom.id,
+            votingroom_name:votingroom.name,
+            votingroom_admin:votingroom.admin.email,
             votingroom_awardorposition:votingroom.awardorposition,
             votingroom_description:votingroom.description,
             votingroom_votingstarts:votingroom.votingstarts,
             votingroom_votingends:votingroom.votingends,
             votingroom_link:`${req.protocol}://${req.get("host")}/api/v1/votingrooms-with-contestants/${votingroom.id}`
           }
-          /* votingroomData.votingroom_awardorposition=votingroom.awardorposition
-          votingroomData.votingroom_description=votingroom.description
-          votingroomData.votingroom_link=`${req.protocol}://${req.get("host")}/api/v1/votingrooms-with-contestants/${votingroom.id}` */
           votingroomsWithContestants.push(votingroomData)
         })
       myconsole.log("exits")
@@ -201,29 +202,3 @@ exports.displayContestantsInVotingRoom=catchAsync(async (req, res) => {
     })
   }
 });
-/* exports.getAllVotingRoomsLinks=catchAsync(async (req, res) => {
-const myconsole = new Econsole("voter-controller.js", "getAllVotingRoomsLinks", "")
-myconsole.log("entry")
-if(req.body.adminData.length!=0){
-  res.status(200).json({
-    status: "success",
-    adminData: req.body.adminData,
-  });
-}else{
-  res.status(401).json({
-    status: "Not voting links",
-    adminData: req.body.adminData,
-  })
-}
-myconsole.log("exits")
-}); */
-
-
-
-
-
-
-
-
-
-

@@ -5,10 +5,10 @@ const catchAsync=require("../utils/catch-async");
 const Econsole=require("../utils/econsole-log")
 const ErrorObject = require("../utils/error")
 
-exports.showAllContestantsForAdmin=catchAsync(async (req, res, next) => {
+exports.showAllContestantsCreatedByAdmin=catchAsync(async (req, res, next) => {
   const myconsole = new Econsole("admin-controller.js", "showAllContestantsForAdmin", "")
   myconsole.log("entry")
-  const contestants = await Contestant.find({admin:req.params.id}).populate("admin").populate("votingroom");
+  const contestants = await Contestant.find({admin:req.params.id}).populate("admin","email").populate("votingroom","awardorposition");
   if(contestants.length!=0){
     res.status(201).json({
       status: "success",
@@ -16,13 +16,46 @@ exports.showAllContestantsForAdmin=catchAsync(async (req, res, next) => {
     });
   }else{
     res.status(201).json({
-      status: "There is no Contestant for the Admin",
+      status: "There are no contestants created by this admin",
       data: {contestants},
     });
   }
   myconsole.log("exits")
 });
-
+exports.showAllVotingRoomsCreatedByAdmin=catchAsync(async (req, res, next) => {
+  const myconsole = new Econsole("admin-controller.js", "showAllVotingRoomsCreatedByAdmin", "")
+  myconsole.log("entry")
+  const votingrooms = await VotingRoom.find({admin:req.params.id}).populate("admin","email").populate("contestants","name");
+  if(votingrooms.length!=0){
+    res.status(201).json({
+      status: "success",
+      data: {votingrooms},
+    });
+  }else{
+    res.status(201).json({
+      status: "There are no voting rooms created by this admin",
+      data: {votingrooms},
+    });
+  }
+  myconsole.log("exits")
+});
+exports.showAllVotesCastInVotingRoomsCreatedByAdmin=catchAsync(async (req, res, next) => {
+  const myconsole = new Econsole("admin-controller.js", "showAllVotesCastInVotingRoomsCreatedByAdmin", "")
+  myconsole.log("entry")
+  const votes = await Vote.find({admin:req.params.id}).populate("admin","email").populate("votingroom","awardorposition").populate("contestant","name");
+  if(votes.length!=0){
+    res.status(201).json({
+      status: "success",
+      data: {votes},
+    });
+  }else{
+    res.status(201).json({
+      status: "There are no votes cast in any voting room created by this admin",
+      data: {votes},
+    });
+  }
+  myconsole.log("exits")
+});
  
   exports.adminOwnsVotingRoom = catchAsync(async (req, res, next) => {
     const myconsole = new Econsole("admin-controller.js", "adminOwnsVotingRoom", "")
@@ -112,7 +145,7 @@ exports.showAllContestantsForAdmin=catchAsync(async (req, res, next) => {
     myconsole.log("entry")
     const votingroom = await VotingRoom.findById(req.params.id);
     if (votingroom!=null) {
-      if (votingroom.adminId != req.user.id) {
+      if (votingroom.admin != req.user.id) {
         myconsole.log("exits")
         return next(
           new ErrorObject(`You did not create the Voting Room`, 403)
@@ -133,7 +166,7 @@ exports.showAllContestantsForAdmin=catchAsync(async (req, res, next) => {
     myconsole.log("entry")
     const vote = await Vote.findById(req.params.id);
     if (vote!=null) {
-      if (vote.adminId != req.user.id) {
+      if (vote.admin != req.user.id) {
         myconsole.log("exits")
         return next(
           new ErrorObject(`The vote was not cast in a Voting Room created by the Admin`, 403)
@@ -152,18 +185,16 @@ exports.showAllContestantsForAdmin=catchAsync(async (req, res, next) => {
   exports.deleteContestant = catchAsync(async (req, res) => {
     const myconsole = new Econsole("admin-controller.js", "deleteContestant", "")
     myconsole.log("entry")
-    const contestant = await Contestant.findById(req.params.id);
-    let votes
-    if (contestant!=null) {
-      await Contestant.deleteOne({_id:contestant.id})
-      votes = await Vote.find({contestantId:contestant.id})
-      if(votes != null){
-        await Promise.all(
-          votes.map(async (vote,v)=>{
-            await Vote.findByIdAndDelete(vote.id)
-          })
-        )
-      }
+    //delete votes cast for contestant
+    const votes = await Vote.find({"contestant":req.params.id})
+    if (votes!=null) {
+      votes.map(async(vote,v)=>{
+        await Vote.findByIdAndDelete(vote.id)
+      })
+    }
+    const contestant = await Contestant.findById(req.params.id)
+    if(contestant !=null){
+      await Contestant.findByIdAndDelete(req.params.id)
       myconsole.log("exits")
       res.json({
         status: "success",
@@ -191,7 +222,13 @@ exports.showAllContestantsForAdmin=catchAsync(async (req, res, next) => {
     const votingroom = await VotingRoom.findById(req.params.id);
     let votes
     if (votingroom!=null) {
-      await VotingRoom.deleteOne({_id:votingroom.id})
+      votes = await Vote.find({"votingroom":votingroom.id})
+      if(votes.length!=0){
+        votes.map(async(vote,v)=>{
+          await Vote.findByIdAndDelete(vote.id)
+        })
+      }
+      await VotingRoom.findByIdAndDelete(votingroom.id)
       myconsole.log("exits")
       res.json({  
         status: "success",
