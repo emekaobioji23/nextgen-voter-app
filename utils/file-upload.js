@@ -2,7 +2,7 @@
 const multer = require("multer");
 const sharp = require('sharp');
 const { cloudUpload } = require("../utils/cloudinary");
-const Econsole = require("../utils/Econsole-log")
+const Econsole = require("../utils/econsole-log")
 
 const multerStorage = multer.diskStorage({});
 

@@ -1,5 +1,5 @@
 
-const Econsole = require("./Econsole-log")
+const Econsole = require("../utils/econsole-log")
 const cloudinary = require("cloudinary");
 const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_SECRET } =
   process.env;
