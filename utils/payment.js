@@ -1,5 +1,6 @@
 const got = require("got");
 const Flutterwave = require("flutterwave-node-v3");
+const Econsole = require("../utils/econsole-log")
 const {
   FLW_SECRET_KEY,
   FLW_PUBLIC_KEY,
@@ -13,7 +14,9 @@ const {
   VOTING_REL_URL,
 } = process.env;
 exports.paymentIntialization = async (req,res) => {
-  console.log(req);
+  const myconsole = new Econsole("payment.js", "paymentIntialization", "")
+  myconsole.log("entry")
+  myconsole.log(req);
   try {
     req.currency = FLW_CUSTOMER_CURRENCY
     const response = await got
@@ -42,24 +45,26 @@ exports.paymentIntialization = async (req,res) => {
         },
       })
       .json();
-    console.log("response=",response);
+    myconsole.log("response=",response);
+    myconsole.log("exits")
     return response;
   } catch (err) {
-    console.log("err.code=",err.code);
-    console.log("err.response.body",err.response.body);
+    myconsole.log("err.code=",err.code);
+    myconsole.log("err.response.body",err.response.body);
     return err
   }
 };
 
 exports.verifyPayment = async (req,res,next) => {
+  const myconsole = new Econsole("payment.js", "verifyPayment", "")
+  myconsole.log("entry")
   const flw = new Flutterwave(FLW_PUBLIC_KEY,FLW_SECRET_KEY);
   flw.Transaction.verify({ id: req.query.transaction_id })
     .then((response) => {
-      console.log(response);
       if (
         response.data?.status === "successful" &&
-        response.data?.amount === req.body.amount &&
-        response.data?.currency === req.body.currency
+        parseInt(response.data?.amount) === parseInt(req.query.amount) &&
+        response.data?.currency === req.query.currency
       ) {
         // Success! Confirm the customer's payment
         next()
@@ -70,6 +75,7 @@ exports.verifyPayment = async (req,res,next) => {
           votinglink:`${req.protocol}://${req.get("host")}${VOTING_REL_URL}${req.params.id}?votingroomId=${req.query.votingroomId}&adminId=${req.query.adminId}`
         });
       }
+      myconsole.log("exits")
     })
     .catch((err)=>console.log(err));
 };
