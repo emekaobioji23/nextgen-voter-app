@@ -2,11 +2,11 @@
   "name": "hmo",
   "version": "1.0.0",
   "description": "Health Maintenance Organization- It is an application that helps to bridge consultancy gap between doctors and patients.",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "nodemon server.js",
-    "start": "node server.js"
+    "start:dev": "nodemon index.js",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
