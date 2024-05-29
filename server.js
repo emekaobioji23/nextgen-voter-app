@@ -11,10 +11,10 @@ const ErrorObject = require("./utils/error");
 const { PORT } = process.env;
 
 const app = express();
-const accessLogStream = fs.createWriteStream(
+/* const accessLogStream = fs.createWriteStream(
   path.join(__dirname, "access.log"),
   { flags: "a" }
-);
+); */
 
 
 // Middlewares
@@ -29,8 +29,8 @@ app.use(cors());
 app.use(express.static(`${__dirname}/public`));
 
 // setup the logger
-app.use(morgan("combined", { stream: accessLogStream }));
-
+/* app.use(morgan("combined", { stream: accessLogStream }));
+ */
 // Route
 
 app.use("/api/v1/admins", adminRoute);
