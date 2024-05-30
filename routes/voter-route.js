@@ -8,7 +8,7 @@ const router = express.Router();
 router.get("/", compileLinksToVotingRoomsWithContestants);
 router.get("/votingrooms-with-contestants/:id", displayContestantsInVotingRoom);//votingroomId
 router.post("/vote/:id", protectPayment,processPayment);//contestantId
-router.post("/vote/complete/:id",protectVote,verifyPayment,vote);//contestantId
+router.get("/vote/complete/:id",protectVote,verifyPayment,vote);//contestantId
 
 
 module.exports = router;
