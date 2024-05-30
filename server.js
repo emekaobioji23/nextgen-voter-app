@@ -38,7 +38,7 @@ app.use("/api/v1", voterRoute);
 
 app.all("*", (req, res, next) => {
   const err = new ErrorObject(
-    `${req.protocol}://${req.get("host")}${req.url} not found`, 404);
+    `${req.protocol}://${req.get("host")}${req.url} is not found from server.js`, 404);
   next(err);
 });
 
