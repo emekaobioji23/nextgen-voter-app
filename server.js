@@ -9,7 +9,6 @@ const voterRoute = require("./routes/voter-route");
 const ErrorHandler = require("./controllers/error-controller");
 const ErrorObject = require("./utils/error");
 const { PORT } = process.env;
-console.log("req.get('host')=",req.get("host"))
 
 const app = express();
 /* const accessLogStream = fs.createWriteStream(

@@ -27,7 +27,6 @@ const {
     const adminId = req.query.adminId;
     //votingurl passed for revote incase payment verification fails later
     //req.body.votingurl =`${req.protocol}://${req.get("host")}${VOTING_REL_URL}${contestantId}?votingroomId=${votingroomId}&adminId=${adminId}`;
-
     //third party payment redirect url. we used ${req.get("host")} instead of ${SERVER_PORT} because paystack was throwing errors
     req.body.redirect_url=`${req.protocol}://${SERVER_PORT}${FLW_CALLBACK_URL}/${contestantId}?votingroomId=${votingroomId}&adminId=${adminId}&amount=${req.body.amount}&currency=${FLW_CUSTOMER_CURRENCY}`
     const response = await paymentIntialization(req.body,res);
@@ -125,6 +124,7 @@ const {
   exports.compileLinksToVotingRoomsWithContestants=catchAsync(async (req, res) => {
     const myconsole = new Econsole("voter-controller.js", "compileLinksToVotingRoomsWithContestants", "")
     myconsole.log("entry")
+    myconsole.log("req.get('host')=",req.get("host"))
     let votingrooms
     let votingroomsWithContestants=[]
     let votingroomData
