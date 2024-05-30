@@ -68,7 +68,7 @@ const {
       });
         req.body.amount = req.query.amount
         let vote = await Vote.create(req.body)
-        vote = await Vote.findById(vote.id).populate("contestant","username name images -_id")
+        vote = await Vote.findById(vote.id).populate("contestant","username name images votinglink -_id")
         .populate("votingroom","-admin -contestants -_id").populate("admin","email -_id")
         //myconsole.log("vote",vote)
           res.status(200).json({
